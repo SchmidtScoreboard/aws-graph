@@ -1,7 +1,7 @@
 'use strict';
 const axios = require('axios');
 const GameStatus = require('../types/GameStatus');
-var games = [];
+var saved_games = [];
 var last_refresh_time = 0; // Refresh each individual game every minute
 var last_full_refresh_time = 0; // Refresh games list every hour
 const ONE_MINUTE_MILLIS = 1000 * 60;
@@ -41,49 +41,99 @@ const NHLTeams = {
     54: { id: 54, city: "Vegas", name: "Golden Knights", display_name: "Golden Knights", abbreviation: "VGK", primary_color: "b9975b", secondary_color: "000000" },
 }
 
+async function refreshSchedule() {
+    console.log("Refreshing schedule");
+    const schedule_url = 'https://statsapi.web.nhl.com/api/v1/schedule';
+    let response = await axios.get(schedule_url);
+    const data = response["data"];
+    var games = [];
+    if (data["dates"].length > 0) {
+        const schedule = data["dates"][0]["games"]
+        games = schedule.map(game => {
+            return {
+                common: {
+                    away_team: NHLTeams[game["teams"]["away"]["team"]["id"]],
+                    home_team: NHLTeams[game["teams"]["home"]["team"]["id"]],
+                    away_score: 0,
+                    home_score: 0,
+                    ordinal: "",
+                    status: GameStatus.getValue("INVALID"),
+                    starttime: game["gameDate"],
+                    id: game["gamePk"]
+                },
+                away_powerplay: false,
+                home_powerplay: false,
+                away_players: 0,
+                home_players: 0
+            }
+        });
+    } else {
+        games = [];
+    }
+    console.log("Found " + games.length + " games!");
+    last_full_refresh_time = Date.now();
+    return await refreshGames(games);
+}
+
+async function refreshGame(game) {
+    console.log("Refreshing game " + game['common']['id']);
+    const game_url = 'https://statsapi.web.nhl.com/api/v1/game/' + game['common']['id'] + '/linescore';
+    let api_response = await axios.get(game_url)
+    const response = api_response["data"];
+    const teams = response['teams'];
+    const away = teams['away'];
+    const home = teams['home'];
+    game['common']['away_score'] = away['goals'];
+    game['common']['home_score'] = home['goals'];
+    game['away_powerplay'] = away['powerPlay'];
+    game['home_powerplay'] = home['powerPlay'];
+    game['away_players'] = away['numSkaters'];
+    game['home_players'] = home['numSkaters'];
+    const period = response['currentPeriod'];
+    const period_time = response['currentPeriodTimeRemaining'];
+    var status = GameStatus.getValue("INVALID");
+    game['common']['ordinal'] = period >= 1 ? response["currentPeriodOrdinal"] : game['common']['startTime']
+
+    //TODO figure out why status is null each time
+    console.log(period_time);
+
+    if (period_time == "Final") {
+        status = GameStatus.getValue("END");
+    } else if (period_time == "END") {
+        if (period >= 3 && away['goals'] != home['goals']) {
+            status = GameStatus.getValue("END");
+        } else {
+            status = GameStatus.getValue("INTERMISSION");
+            game['common']['ordinal'] += " INT";
+        }
+    } else if (period_time != "20:00") {
+        status = GameStatus.getValue("ACTIVE");
+    } else {
+        status = GameStatus.getValue("PREGAME");
+    }
+    game['common']['status'] = status;
+    return game;
+}
+
+async function refreshGames(games) {
+    last_refresh_time = Date.now();
+
+    saved_games = await Promise.all(games.map(async (game) => {
+        return await refreshGame(game);
+    }));
+    return saved_games;
+}
 
 const NHLController = {
-    index: (args) => {
+    index: () => {
         // TODO implement NHL
+        var promise = saved_games;
         if (last_full_refresh_time + ONE_HOUR_MILLIS < Date.now()) {
-            const schedule_url = 'https://statsapi.web.nhl.com/api/v1/schedule';
-            return axios.get(schedule_url).then((response) => {
-                const data = response["data"];
-                if (data["dates"].length > 0) {
-                    const schedule = data["dates"][0]["games"]
-                    games = schedule.map(game => {
-                        return {
-                            common: {
-                                away_team: NHLTeams[game["teams"]["away"]["team"]["id"]],
-                                home_team: NHLTeams[game["teams"]["home"]["team"]["id"]],
-                                away_score: 0,
-                                home_score: 0,
-                                ordinal: "blah",
-                                status: GameStatus.INVALID,
-                                starttime: "blah",
-                                id: game["gamePk"]
-                            },
-                            away_powerplay: false,
-                            home_powerplay: false,
-                            away_players: 0,
-                            home_players: 0
-                        }
-                    });
-                } else {
-                    games = [];
-                }
-                return games;
-            }).catch((error) => {
-                console.log(error);
-                return { error: "Server Error" };
-            });
+            promise = refreshSchedule();
+        } else if (last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
+            promise = refreshGames(saved_games);
         }
-
-        if (last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
-
-        }
-        console.log("length " + games.length);
-        return games;
+        return promise;
     }
 }
 
