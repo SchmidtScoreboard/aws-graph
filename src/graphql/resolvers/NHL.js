@@ -57,7 +57,7 @@ async function refreshSchedule() {
                     away_score: 0,
                     home_score: 0,
                     ordinal: "",
-                    status: GameStatus.getValue("INVALID"),
+                    status: GameStatus.INVALID,
                     starttime: game["gameDate"],
                     id: game["gamePk"]
                 },
@@ -91,25 +91,25 @@ async function refreshGame(game) {
     game['home_players'] = home['numSkaters'];
     const period = response['currentPeriod'];
     const period_time = response['currentPeriodTimeRemaining'];
-    var status = GameStatus.getValue("INVALID");
+    var status = GameStatus.INVALID;
     game['common']['ordinal'] = period >= 1 ? response["currentPeriodOrdinal"] : game['common']['startTime']
 
     //TODO figure out why status is null each time
     console.log(period_time);
 
     if (period_time == "Final") {
-        status = GameStatus.getValue("END");
+        status = GameStatus.END;
     } else if (period_time == "END") {
         if (period >= 3 && away['goals'] != home['goals']) {
-            status = GameStatus.getValue("END");
+            status = GameStatus.END;
         } else {
-            status = GameStatus.getValue("INTERMISSION");
+            status = GameStatus.INTERMISSION;
             game['common']['ordinal'] += " INT";
         }
     } else if (period_time != "20:00") {
-        status = GameStatus.getValue("ACTIVE");
+        status = GameStatus.ACTIVE;
     } else {
-        status = GameStatus.getValue("PREGAME");
+        status = GameStatus.PREGAME;
     }
     game['common']['status'] = status;
     return game;
