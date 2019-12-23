@@ -58,7 +58,7 @@ async function refreshSchedule() {
                     home_score: 0,
                     ordinal: "",
                     status: GameStatus.INVALID,
-                    starttime: game["gameDate"],
+                    start_time: game["gameDate"],
                     id: game["gamePk"]
                 },
                 away_powerplay: false,
@@ -90,28 +90,30 @@ async function refreshGame(game) {
     game['away_players'] = away['numSkaters'];
     game['home_players'] = home['numSkaters'];
     const period = response['currentPeriod'];
-    const period_time = response['currentPeriodTimeRemaining'];
-    var status = GameStatus.INVALID;
-    game['common']['ordinal'] = period >= 1 ? response["currentPeriodOrdinal"] : game['common']['startTime']
+    // current period time remaining does not appear until the game starts
+    const period_time = response['currentPeriodTimeRemaining'] || '20:00';
+    if (period >= 1) {
+        game['common']['ordinal'] = response["currentPeriodOrdinal"] || '1st';
+    }
 
-    //TODO figure out why status is null each time
-    console.log(period_time);
-
+    var status = GameStatus.getValue("INVALID").value;
     if (period_time == "Final") {
-        status = GameStatus.END;
+        status = GameStatus.getValue("END").value;
     } else if (period_time == "END") {
         if (period >= 3 && away['goals'] != home['goals']) {
-            status = GameStatus.END;
+            status = GameStatus.getValue("END").value;
         } else {
-            status = GameStatus.INTERMISSION;
+            status = GameStatus.getValue("INTERMISSION").value;
             game['common']['ordinal'] += " INT";
         }
     } else if (period_time != "20:00") {
-        status = GameStatus.ACTIVE;
+        status = GameStatus.getValue("ACTIVE").value;
     } else {
-        status = GameStatus.PREGAME;
+        status = GameStatus.getValue("PREGAME").value;
     }
     game['common']['status'] = status;
+    console.log('Status ' + game['common']['status']);
+    console.log("Done Refreshing game " + game['common']['id']);
     return game;
 }
 
