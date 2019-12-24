@@ -4,6 +4,7 @@ const GameStatus = require('../types/GameStatus');
 var saved_games = [];
 var last_refresh_time = 0; // Refresh each individual game every minute
 var last_full_refresh_time = 0; // Refresh games list every hour
+var isError = false;
 const ONE_MINUTE_MILLIS = 1000 * 60;
 const ONE_HOUR_MILLIS = ONE_MINUTE_MILLIS * 60;
 
@@ -42,36 +43,44 @@ const NHLTeams = {
 }
 
 async function refreshSchedule() {
-    console.log("Refreshing schedule");
-    const schedule_url = 'https://statsapi.web.nhl.com/api/v1/schedule';
-    let response = await axios.get(schedule_url);
-    const data = response["data"];
-    var games = [];
-    if (data["dates"].length > 0) {
-        const schedule = data["dates"][0]["games"]
-        games = schedule.map(game => {
-            return {
-                common: {
-                    away_team: NHLTeams[game["teams"]["away"]["team"]["id"]],
-                    home_team: NHLTeams[game["teams"]["home"]["team"]["id"]],
-                    away_score: 0,
-                    home_score: 0,
-                    ordinal: "",
-                    status: GameStatus.INVALID,
-                    start_time: game["gameDate"],
-                    id: game["gamePk"]
-                },
-                away_powerplay: false,
-                home_powerplay: false,
-                away_players: 0,
-                home_players: 0
-            }
-        });
-    } else {
-        games = [];
-    }
-    console.log("Found " + games.length + " games!");
     last_full_refresh_time = Date.now();
+    try {
+
+        console.log("Refreshing schedule");
+        const schedule_url = 'https://statsapi.web.nhl.com/api/v1/schedule';
+        let response = await axios.get(schedule_url);
+        const data = response["data"];
+        var games = [];
+        if (data["dates"].length > 0) {
+            const schedule = data["dates"][0]["games"]
+            games = schedule.map(game => {
+                return {
+                    common: {
+                        away_team: NHLTeams[game["teams"]["away"]["team"]["id"]],
+                        home_team: NHLTeams[game["teams"]["home"]["team"]["id"]],
+                        away_score: 0,
+                        home_score: 0,
+                        ordinal: "",
+                        status: GameStatus.INVALID,
+                        start_time: game["gameDate"],
+                        id: game["gamePk"]
+                    },
+                    away_powerplay: false,
+                    home_powerplay: false,
+                    away_players: 0,
+                    home_players: 0
+                }
+            });
+        } else {
+            games = [];
+        }
+        console.log("Found " + games.length + " games!");
+    } catch {
+
+        console.log("There was an error refreshing games");
+        isError = true;
+        return new Error("Internal Server Error");
+    }
     return await refreshGames(games);
 }
 
@@ -112,25 +121,35 @@ async function refreshGame(game) {
         status = GameStatus.getValue("PREGAME").value;
     }
     game['common']['status'] = status;
-    console.log('Status ' + game['common']['status']);
     console.log("Done Refreshing game " + game['common']['id']);
     return game;
 }
 
 async function refreshGames(games) {
     last_refresh_time = Date.now();
+    try {
+        saved_games = await Promise.all(games.map(async (game) => {
+            return await refreshGame(game);
+        }));
+        isError = false;
+        return saved_games;
+    } catch {
+        console.log("There was an error refreshing games");
+        isError = true;
+        return new Error("Internal Server Error");
 
-    saved_games = await Promise.all(games.map(async (game) => {
-        return await refreshGame(game);
-    }));
-    return saved_games;
+    }
 }
 
 const NHLController = {
     index: () => {
         // TODO implement NHL
         var promise = saved_games;
-        if (last_full_refresh_time + ONE_HOUR_MILLIS < Date.now()) {
+        if (isError && last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
+            // When in error mode, 
+            promise = refreshSchedule();
+        }
+        else if (last_full_refresh_time + ONE_HOUR_MILLIS < Date.now()) {
             promise = refreshSchedule();
         } else if (last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
             promise = refreshGames(saved_games);
