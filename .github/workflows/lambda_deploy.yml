@@ -8,7 +8,7 @@ jobs:
     steps:
       - name: Build binary
         run: |
-          zip deployment.zip *
+          zip -r development.zip .
       - name: default deploy
         uses: appleboy/lambda-action@master
         with:
