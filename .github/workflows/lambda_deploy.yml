@@ -7,7 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Build binary
+      - name: Install node modules
+        run: |
+          npm install
+      - name: Zip files
         run: |
           zip -r deployment.zip .
       - name: Deploy zip file
