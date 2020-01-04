@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@master
       - name: Build binary
         run: |
-          zip -r development.zip .
+          zip -r deployment.zip .
       - name: Deploy zip file
         uses: appleboy/lambda-action@master
         with:
