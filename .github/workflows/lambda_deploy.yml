@@ -6,6 +6,7 @@ jobs:
     name: deploy lambda function
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@master
       - name: Build binary
         run: |
           zip -r development.zip .
