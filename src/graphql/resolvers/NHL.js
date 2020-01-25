@@ -40,6 +40,8 @@ const NHLTeams = {
     52: { id: 52, city: "Winnipeg", name: "Jets", display_name: "Jets", abbreviation: "WPG", primary_color: "041e42", secondary_color: "a2aaad" },
     53: { id: 53, city: "Arizona", name: "Coyotes", display_name: "Coyotes", abbreviation: "ARI", primary_color: "8c2633", secondary_color: "e2d6b5" },
     54: { id: 54, city: "Vegas", name: "Golden Knights", display_name: "Golden Knights", abbreviation: "VGK", primary_color: "b9975b", secondary_color: "000000" },
+    7460: { id: 7460, city: "Canada", name: "Canadian All Stars", display_name: "Canada", abbreviation: "CA", primary_color: "fffff", secondary_color: "000000" },
+    7461: { id: 7461, city: "America", name: "American All Stars", display_name: "America", abbreviation: "USA", primary_color: "fffff", secondary_color: "000000" },
 }
 
 async function refreshSchedule() {
@@ -53,7 +55,13 @@ async function refreshSchedule() {
         var games = [];
         if (data["dates"].length > 0) {
             const schedule = data["dates"][0]["games"]
-            games = schedule.map(game => {
+
+            games = schedule.filter(game => {
+                // first, make sure both teams show up in our team list
+                const awayId = game["teams"]["away"]["team"]["id"]
+                const homeId = game["teams"]["home"]["team"]["id"]
+                return awayId in NHLTeams && homeId in NHLTeams;
+            }).map(game => {
                 return {
                     common: {
                         away_team: NHLTeams[game["teams"]["away"]["team"]["id"]],
@@ -75,9 +83,9 @@ async function refreshSchedule() {
             games = [];
         }
         console.log("Found " + games.length + " games!");
-    } catch {
+    } catch (err) {
 
-        console.log("There was an error refreshing games");
+        console.log("There was an error refreshing games, " + err);
         isError = true;
         return new Error("Internal Server Error");
     }
@@ -115,7 +123,7 @@ async function refreshGame(game) {
             status = GameStatus.getValue("INTERMISSION").value;
             game['common']['ordinal'] += " INT";
         }
-    } else if (period_time != "20:00") {
+    } else if (period_time != "20:00" && period >= 1) {
         status = GameStatus.getValue("ACTIVE").value;
     } else {
         status = GameStatus.getValue("PREGAME").value;

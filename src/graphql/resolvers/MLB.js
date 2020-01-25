@@ -54,7 +54,11 @@ async function refreshSchedule() {
         var games = [];
         if (data["dates"].length > 0) {
             const schedule = data["dates"][0]["games"]
-            games = schedule.map(game => {
+            games = schedule.filter(game => {
+                const awayId = game["teams"]["away"]["team"]["id"];
+                const homeId = game["teams"]["home"]["team"]["id"];
+                return awayId in MLBTeams && homeId in MLBTeams;
+            }).map(game => {
                 return {
                     common: {
                         away_team: MLBTeams[game["teams"]["away"]["team"]["id"]],
@@ -77,9 +81,9 @@ async function refreshSchedule() {
             games = [];
         }
         console.log("Found " + games.length + " games!");
-    } catch {
+    } catch (err) {
 
-        console.log("There was an error refreshing games");
+        console.log("There was an error refreshing games, " + err);
         isError = true;
         return new Error("Internal Server Error");
     }
@@ -121,8 +125,9 @@ async function refreshGame(game) {
         game['outs'] = linescore['outs'];
         game['strikes'] = linescore['strikes'];
         if (game['outs'] == 3) {
-            // if (self.inning >= 9 and self.is_inning_top and self.home_score > self.away_score) or(self.inning >= 9 and not self.is_inning_top and self.home_score != self.away_score):
             // TODO: This is an awful if statement, it should be broken up into pieces
+            // if it is at least the 9th inning, and it's the end of the top of the inning and the home team has more points, the home team wins
+            // if it's the end of the bottom of the >=9th inning, and either team has more points, the game is over
             if (game['inning'] >= 9 && (
                 (game['is_inning_top'] && home['runs'] > away['runs']) ||
                 (!game['is_inning_top'] && home['runs'] != away['runs'])
