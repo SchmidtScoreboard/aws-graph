@@ -123,6 +123,9 @@ async function refreshGame(game) {
             status = GameStatus.getValue("INTERMISSION").value;
             game['common']['ordinal'] += " INT";
         }
+    } else if (period_time == "20:00" && period > 1) {
+        status = GameStatus.getValue("INTERMISSION").value;
+        game['common']['ordinal'] += " INT";
     } else if (period_time != "20:00" && period >= 1) {
         status = GameStatus.getValue("ACTIVE").value;
     } else {
