@@ -39,9 +39,12 @@ const NHLTeams = {
     30: { id: 30, city: "Minnesota", name: "Wild", display_name: "Wild", abbreviation: "MIN", primary_color: "154734", secondary_color: "a6192e" },
     52: { id: 52, city: "Winnipeg", name: "Jets", display_name: "Jets", abbreviation: "WPG", primary_color: "041e42", secondary_color: "a2aaad" },
     53: { id: 53, city: "Arizona", name: "Coyotes", display_name: "Coyotes", abbreviation: "ARI", primary_color: "8c2633", secondary_color: "e2d6b5" },
-    54: { id: 54, city: "Vegas", name: "Golden Knights", display_name: "Knights", abbreviation: "VGK", primary_color: "b9975b", secondary_color: "000000" },
-    7460: { id: 7460, city: "Canada", name: "Canadian All Stars", display_name: "Canada", abbreviation: "CA", primary_color: "fffff", secondary_color: "000000" },
-    7461: { id: 7461, city: "America", name: "American All Stars", display_name: "America", abbreviation: "USA", primary_color: "fffff", secondary_color: "000000" },
+    87: { id: 87, city: "Atlantic", name: "Atlantic All Stars", display_name: "Atlantic", abbreviation: "ATL", primary_color: "fa1b1b", secondary_color: "000000" },
+    88: { id: 88, city: "Metropolitan", name: "Metropolitan All Stars", display_name: "Metro", abbreviation: "MET", primary_color: "fae71b", secondary_color: "000000" },
+    89: { id: 89, city: "Central", name: "Central All Stars", display_name: "Central", abbreviation: "CEN", primary_color: "1411bd", secondary_color: "000000" },
+    90: { id: 90, city: "Pacific", name: "Pacific All Stars", display_name: "Pacific", abbreviation: "PAC", primary_color: "11bd36", secondary_color: "000000" },
+    7460: { id: 7460, city: "Canada", name: "Canadian All Stars", display_name: "Canada", abbreviation: "CA", primary_color: "d11717", secondary_color: "ffffff" },
+    7461: { id: 7461, city: "America", name: "American All Stars", display_name: "America", abbreviation: "USA", primary_color: "3271a8", secondary_color: "ffffff" },
 }
 
 async function refreshSchedule() {
