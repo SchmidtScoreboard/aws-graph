@@ -5,6 +5,9 @@ var saved_games = [];
 var last_refresh_time = 0; // Refresh each individual game every minute
 var last_full_refresh_time = 0; // Refresh games list every hour
 var isError = false;
+var req_num = 0;
+var isRefreshing = false;
+var promise;
 const ONE_MINUTE_MILLIS = 1000 * 60;
 const ONE_HOUR_MILLIS = ONE_MINUTE_MILLIS * 60;
 
@@ -167,16 +170,18 @@ async function refreshGames(games) {
 
 const MLBController = {
     index: () => {
-        // TODO implement MLB
-        var promise = saved_games;
-        if (isError && last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
-            // When in error mode, 
-            promise = refreshSchedule();
-        }
-        else if (last_full_refresh_time + ONE_HOUR_MILLIS < Date.now()) {
-            promise = refreshSchedule();
-        } else if (last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
-            promise = refreshGames(saved_games);
+        req_num++;
+        console.log("Got request " + req_num + " at " + Date.now());
+        if (!isRefreshing) { // If we are refreshing, the promise is waiting to finish
+            promise = saved_games;
+            if (isError && last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
+                promise = refreshSchedule();
+            }
+            else if (last_full_refresh_time + ONE_HOUR_MILLIS < Date.now()) {
+                promise = refreshSchedule();
+            } else if (last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
+                promise = refreshGames(saved_games);
+            }
         }
         return promise;
     }
