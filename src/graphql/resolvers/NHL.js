@@ -92,7 +92,7 @@ async function refreshSchedule() {
         console.log("Found " + games.length + " games!");
     } catch (err) {
 
-        console.log("There was an error refreshing games, " + err);
+        console.log("There was an error refreshing schedule, " + err);
         isError = true;
         return new Error("Internal Server Error");
     }
@@ -153,8 +153,8 @@ async function refreshGames(games) {
         isError = false;
         isRefreshing = false;
         return saved_games;
-    } catch {
-        console.log("There was an error refreshing games");
+    } catch (err) {
+        console.log("There was an error refreshing games " + err);
         isError = true;
         return new Error("Internal Server Error");
 

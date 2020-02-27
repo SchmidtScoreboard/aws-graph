@@ -95,9 +95,9 @@ async function refreshSchedule() {
 
 async function refreshGame(game) {
     console.log("Refreshing game " + game['common']['id']);
-    const game_url = 'https://statsapi.web.MLB.com/api/v1/game/' + game['common']['id'] + '/linescore';
-    const feed_url = 'https://statsapi.web.MLB.com/api/v1/game/' + game['common']['id'] + '/feed'
-    let linescore = await axios.get(game_url)
+    const feed_url = 'https://statsapi.mlb.com/api/v1.1/game/' + game['common']['id'] + '/feed/live'
+    let feed_response = await axios.get(feed_url)
+
     const teams = linescore['teams'];
     const away = teams['away'];
     const home = teams['home'];
@@ -106,7 +106,6 @@ async function refreshGame(game) {
     game['inning'] = linescore['currentInning'] || 0;
     game['is_inning_top'] = linescore['isTopInning'] || false;
 
-    let feed_response = await axios.get(feed_url)
     const feed_data = feed_response["gameData"];
     const gameState = feed_data['status']['abstractGameState'];
     if (gameState == 'Final') {
@@ -160,8 +159,8 @@ async function refreshGames(games) {
         }));
         isError = false;
         return saved_games;
-    } catch {
-        console.log("There was an error refreshing games");
+    } catch (err) {
+        console.log("There was an error refreshing games " + err);
         isError = true;
         return new Error("Internal Server Error");
 
