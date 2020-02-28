@@ -51,7 +51,7 @@ async function refreshSchedule() {
     try {
 
         console.log("Refreshing schedule");
-        const schedule_url = 'https://statsapi.mlb.com/api/v1/schedule?sportId=1';
+        const schedule_url = 'http://statsapi.mlb.com/api/v1/schedule?sportId=1';
         let response = await axios.get(schedule_url);
         const data = response["data"];
         var games = [];
@@ -86,7 +86,7 @@ async function refreshSchedule() {
         console.log("Found " + games.length + " games!");
     } catch (err) {
 
-        console.log("There was an error refreshing games, " + err);
+        console.log("There was an error refreshing schedule, " + err);
         isError = true;
         return new Error("Internal Server Error");
     }
@@ -94,8 +94,8 @@ async function refreshSchedule() {
 }
 
 async function refreshGame(game) {
-    console.log("Refreshing game " + game['common']['id']);
-    const feed_url = 'https://statsapi.mlb.com/api/v1.1/game/' + game['common']['id'] + '/feed/live'
+    const feed_url = 'http://statsapi.mlb.com/api/v1.1/game/' + game['common']['id'] + '/feed/live'
+    console.log("Refreshing game " + game['common']['id'] + " url: " + feed_url);
     let feed_result = await axios.get(feed_url);
     let feed_response = feed_result["data"]
     let linescore = feed_response["liveData"]["linescore"];
