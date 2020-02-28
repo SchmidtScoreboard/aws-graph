@@ -154,10 +154,17 @@ async function refreshGame(game) {
 async function refreshGames(games) {
     last_refresh_time = Date.now();
     try {
-        saved_games = await Promise.all(games.map(async (game) => {
-            return await refreshGame(game);
-        }));
+        var new_games = [];
+        for (var game of games) {
+            let update = await refreshGame(game);
+            new_games.push(update);
+        }
+        // saved_games = await Promise.all(games.map(async (game) => {
+        //     return await refreshGame(game);
+        // }));
         isError = false;
+        saved_games = new_games
+        console.log("Finished refreshing all games!");
         return saved_games;
     } catch (err) {
         console.log("There was an error refreshing games " + err);
