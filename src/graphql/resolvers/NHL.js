@@ -26,7 +26,7 @@ const NHLTeams = {
     13: { id: 13, city: "Florida", name: "Panthers", display_name: "Panthers", abbreviation: "FLA", primary_color: "c8102e", secondary_color: "b9975b" },
     14: { id: 14, city: "Tampa Bay", name: "Lightning", display_name: "Lightning", abbreviation: "TBL", primary_color: "00205b", secondary_color: "ffffff" },
     15: { id: 15, city: "Washington", name: "Capitals", display_name: "Capitals", abbreviation: "WSH", primary_color: "041e42", secondary_color: "c8102e" },
-    16: { id: 16, city: "Chicago", name: "Blackhawks", display_name: "Blackhawks", abbreviation: "CHI", primary_color: "ce1126", secondary_color: "cc8a00" },
+    16: { id: 16, city: "Chicago", name: "Blackhawks", display_name: "B. Hawks", abbreviation: "CHI", primary_color: "ce1126", secondary_color: "cc8a00" },
     17: { id: 17, city: "Detroit", name: "Red Wings", display_name: "Red Wings", abbreviation: "DET", primary_color: "c8102e", secondary_color: "ffffff" },
     18: { id: 18, city: "Nashville", name: "Predators", display_name: "Predators", abbreviation: "NSH", primary_color: "ffb81c", secondary_color: "041e42" },
     19: { id: 19, city: "St. Louis", name: "Blues", display_name: "Blues", abbreviation: "STL", primary_color: "002f87", secondary_color: "ffb81c" },
@@ -60,35 +60,53 @@ async function refreshSchedule() {
         let response = await axios.get(schedule_url);
         const data = response["data"];
         var games = [];
-        if (data["dates"].length > 0) {
-            const schedule = data["dates"][0]["games"]
+        // if (data["dates"].length > 0) {
+        //     const schedule = data["dates"][0]["games"]
 
-            games = schedule.filter(game => {
-                // first, make sure both teams show up in our team list
-                const awayId = game["teams"]["away"]["team"]["id"]
-                const homeId = game["teams"]["home"]["team"]["id"]
-                return awayId in NHLTeams && homeId in NHLTeams;
-            }).map(game => {
-                return {
-                    common: {
-                        away_team: NHLTeams[game["teams"]["away"]["team"]["id"]],
-                        home_team: NHLTeams[game["teams"]["home"]["team"]["id"]],
-                        away_score: 0,
-                        home_score: 0,
-                        ordinal: "",
-                        status: GameStatus.INVALID,
-                        start_time: game["gameDate"],
-                        id: game["gamePk"]
-                    },
-                    away_powerplay: false,
-                    home_powerplay: false,
-                    away_players: 0,
-                    home_players: 0
-                }
-            });
-        } else {
-            games = [];
-        }
+        // games = schedule.filter(game => {
+        //     // first, make sure both teams show up in our team list
+        //     const awayId = game["teams"]["away"]["team"]["id"]
+        //     const homeId = game["teams"]["home"]["team"]["id"]
+        //     return awayId in NHLTeams && homeId in NHLTeams;
+        // }).map(game => {
+        // return {
+        //     common: {
+        //         away_team: NHLTeams[game["teams"]["away"]["team"]["id"]],
+        //         home_team: NHLTeams[game["teams"]["home"]["team"]["id"]],
+        //         away_score: 0,
+        //         home_score: 0,
+        //         ordinal: "",
+        //         status: GameStatus.INVALID,
+        //         start_time: game["gameDate"],
+        //         id: game["gamePk"]
+        //     },
+        //     away_powerplay: false,
+        //     home_powerplay: false,
+        //     away_players: 0,
+        //     home_players: 0
+        // }
+        games = [
+            {
+                common: {
+                    away_team: NHLTeams[16],
+                    home_team: NHLTeams[19],
+                    away_score: 4,
+                    home_score: 4,
+                    ordinal: "3rd",
+                    status: GameStatus.getValue("ACTIVE").value,
+                    start_time: "2020-07-02T16:05:00Z",
+                    id: 5
+                },
+                away_powerplay: true,
+                home_powerplay: false,
+                away_players: 5,
+                home_players: 4
+            }
+        ];
+        //     });
+        // } else {
+        //     games = [];
+        // }
         console.log("Found " + games.length + " games!");
     } catch (err) {
 
@@ -96,7 +114,8 @@ async function refreshSchedule() {
         isError = true;
         return new Error("Internal Server Error");
     }
-    return await refreshGames(games);
+    // return await refreshGames(games);
+    return games;
 }
 
 async function refreshGame(game) {
@@ -173,7 +192,7 @@ const NHLController = {
             else if (last_full_refresh_time + ONE_HOUR_MILLIS < Date.now()) {
                 promise = refreshSchedule();
             } else if (last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
-                promise = refreshGames(saved_games);
+                //promise = refreshGames(saved_games);
             }
         }
         return promise;

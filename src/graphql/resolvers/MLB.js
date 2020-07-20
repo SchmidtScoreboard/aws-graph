@@ -55,34 +55,54 @@ async function refreshSchedule() {
         let response = await axios.get(schedule_url);
         const data = response["data"];
         var games = [];
-        if (data["dates"].length > 0) {
-            const schedule = data["dates"][0]["games"]
-            games = schedule.filter(game => {
-                const awayId = game["teams"]["away"]["team"]["id"];
-                const homeId = game["teams"]["home"]["team"]["id"];
-                return awayId in MLBTeams && homeId in MLBTeams;
-            }).map(game => {
-                return {
-                    common: {
-                        away_team: MLBTeams[game["teams"]["away"]["team"]["id"]],
-                        home_team: MLBTeams[game["teams"]["home"]["team"]["id"]],
-                        away_score: 0,
-                        home_score: 0,
-                        ordinal: "",
-                        status: GameStatus.INVALID,
-                        start_time: game["gameDate"],
-                        id: game["gamePk"]
-                    },
-                    balls: 0,
-                    outs: 0,
-                    strikes: 0,
-                    inning: 0,
-                    is_inning_top: false
-                }
-            });
-        } else {
-            games = [];
-        }
+        games = [
+            {
+                common: {
+                    away_team: MLBTeams[112],
+                    home_team: MLBTeams[138],
+                    away_score: 5,
+                    home_score: 5,
+                    ordinal: "8th",
+                    status: GameStatus.getValue("ACTIVE").value,
+                    start_time: "2020-07-02T16:05:00Z",
+                    id: 5
+                },
+                balls: 2,
+                outs: 1,
+                strikes: 2,
+                inning: 8,
+                is_inning_top: true
+            }
+
+        ];
+        // if (data["dates"].length > 0) {
+        //     const schedule = data["dates"][0]["games"]
+        //     games = schedule.filter(game => {
+        //         const awayId = game["teams"]["away"]["team"]["id"];
+        //         const homeId = game["teams"]["home"]["team"]["id"];
+        //         return awayId in MLBTeams && homeId in MLBTeams;
+        //     }).map(game => {
+        //         return {
+        //             common: {
+        //                 away_team: MLBTeams[game["teams"]["away"]["team"]["id"]],
+        //                 home_team: MLBTeams[game["teams"]["home"]["team"]["id"]],
+        //                 away_score: 0,
+        //                 home_score: 0,
+        //                 ordinal: "",
+        //                 status: GameStatus.INVALID,
+        //                 start_time: game["gameDate"],
+        //                 id: game["gamePk"]
+        //             },
+        //             balls: 0,
+        //             outs: 0,
+        //             strikes: 0,
+        //             inning: 0,
+        //             is_inning_top: false
+        //         }
+        //     });
+        // } else {
+        //     games = [];
+        // }
         console.log("Found " + games.length + " games!");
     } catch (err) {
 
@@ -90,7 +110,8 @@ async function refreshSchedule() {
         isError = true;
         return new Error("Internal Server Error");
     }
-    return await refreshGames(games);
+    return games;
+    // return await refreshGames(games);
 }
 
 async function refreshGame(game) {
@@ -186,7 +207,7 @@ const MLBController = {
             else if (last_full_refresh_time + ONE_HOUR_MILLIS < Date.now()) {
                 promise = refreshSchedule();
             } else if (last_refresh_time + ONE_MINUTE_MILLIS < Date.now()) {
-                promise = refreshGames(saved_games);
+                // promise = refreshGames(saved_games);
             }
         }
         return promise;
