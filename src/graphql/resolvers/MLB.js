@@ -48,6 +48,7 @@ const MLBTeams = {
 
 async function refreshSchedule() {
     last_full_refresh_time = Date.now();
+
     try {
 
         console.log("Refreshing schedule");
