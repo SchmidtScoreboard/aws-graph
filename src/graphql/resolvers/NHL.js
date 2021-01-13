@@ -26,7 +26,7 @@ const NHLTeams = {
     13: { id: 13, city: "Florida", name: "Panthers", display_name: "Panthers", abbreviation: "FLA", primary_color: "c8102e", secondary_color: "b9975b" },
     14: { id: 14, city: "Tampa Bay", name: "Lightning", display_name: "Lightning", abbreviation: "TBL", primary_color: "00205b", secondary_color: "ffffff" },
     15: { id: 15, city: "Washington", name: "Capitals", display_name: "Capitals", abbreviation: "WSH", primary_color: "041e42", secondary_color: "c8102e" },
-    16: { id: 16, city: "Chicago", name: "Blackhawks", display_name: "B Hawks", abbreviation: "CHI", primary_color: "ce1126", secondary_color: "cc8a00" },
+    16: { id: 16, city: "Chicago", name: "Blackhawks", display_name: "B Hawks", abbreviation: "CHI", primary_color: "ce1126", secondary_color: "000000" },
     17: { id: 17, city: "Detroit", name: "Red Wings", display_name: "Red Wings", abbreviation: "DET", primary_color: "c8102e", secondary_color: "ffffff" },
     18: { id: 18, city: "Nashville", name: "Predators", display_name: "Predators", abbreviation: "NSH", primary_color: "ffb81c", secondary_color: "041e42" },
     19: { id: 19, city: "St. Louis", name: "Blues", display_name: "Blues", abbreviation: "STL", primary_color: "002f87", secondary_color: "ffb81c" },
