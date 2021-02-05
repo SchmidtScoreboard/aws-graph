@@ -33,7 +33,7 @@ const NHLTeams = {
     20: { id: 20, city: "Calgary", name: "Flames", display_name: "Flames", abbreviation: "CGY", primary_color: "ce1126", secondary_color: "f3bc52" },
     21: { id: 21, city: "Colorado", name: "Avalanche", display_name: "Avalanche", abbreviation: "COL", primary_color: "236192", secondary_color: "d94574" },
     22: { id: 22, city: "Edmonton", name: "Oilers", display_name: "Oilers", abbreviation: "EDM", primary_color: "fc4c02", secondary_color: "041e42" },
-    23: { id: 23, city: "Vancouver", name: "Canucks", display_name: "Canucks", abbreviation: "VAN", primary_color: "008852", secondary_color: "00205b" },
+    23: { id: 23, city: "Vancouver", name: "Canucks", display_name: "Canucks", abbreviation: "VAN", primary_color: "041c2c", secondary_color: "00843d" },
     24: { id: 24, city: "Anaheim", name: "Ducks", display_name: "Ducks", abbreviation: "ANA", primary_color: "b5985a", secondary_color: "ffffff" },
     25: { id: 25, city: "Dallas", name: "Stars", display_name: "Stars", abbreviation: "DAL", primary_color: "006341", secondary_color: "a2aaad" },
     26: { id: 26, city: "Los Angeles", name: "Kings", display_name: "Kings", abbreviation: "LAK", primary_color: "a2aaad", secondary_color: "000000" },
